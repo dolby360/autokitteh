@@ -162,7 +162,8 @@ func (r *LocalPython) Start(pyExe string, tarData []byte, env map[string]string,
 	}
 
 	// make sure runner is killed if ak is killed
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	// cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setSysProcAttr(cmd)
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start runner - %w", err)
@@ -177,7 +178,7 @@ func (r *LocalPython) Start(pyExe string, tarData []byte, env map[string]string,
 func (r *LocalPython) Health() error {
 	var status syscall.WaitStatus
 
-	pid, err := syscall.Wait4(r.proc.Pid, &status, syscall.WNOHANG, nil)
+	pid, err := wait4Wrapper(r.proc.Pid, &status, WNOHANG, nil)
 	if err != nil {
 		return fmt.Errorf("wait proc: %w", err)
 	}
